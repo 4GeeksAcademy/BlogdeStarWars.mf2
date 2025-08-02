@@ -1,24 +1,26 @@
-// Import necessary hooks and functions from React.
-import { useContext, useReducer, createContext } from "react";
-import storeReducer, { initialStore } from "../store"  // Import the reducer and the initial state.
+import { useEffect, useRef } from "react";
+import PropTypes from "prop-types";
 
-// Create a context to hold the global state of the application
-// We will call this global state the "store" to avoid confusion while using local states
-const StoreContext = createContext()
+// This component allows the scroll to go to the beginning when changing the view,
+// otherwise it would remain in the position of the previous view. 
+// Investigate more about this React behavior :D 
 
-// Define a provider component that encapsulates the store and warps it in a context provider to 
-// broadcast the information throught all the app pages and components.
-export function StoreProvider({ children }) {
-    // Initialize reducer with the initial state.
-    const [store, dispatch] = useReducer(storeReducer, initialStore())
-    // Provide the store and dispatch method to all child components.
-    return <StoreContext.Provider value={{ store, dispatch }}>
-        {children}
-    </StoreContext.Provider>
-}
+const ScrollToTop = ({ location, children }) => {
+    const prevLocation = useRef(location);
 
-// Custom hook to access the global state and dispatch function.
-export default function useGlobalReducer() {
-    const { dispatch, store } = useContext(StoreContext)
-    return { dispatch, store };
-}
+    useEffect(() => {
+        if (location !== prevLocation.current) {
+            window.scrollTo(0, 0);
+        }
+        prevLocation.current = location;
+    }, [location]);
+
+    return children;
+};
+
+export default ScrollToTop;
+
+ScrollToTop.propTypes = {
+    location: PropTypes.object,
+    children: PropTypes.any
+};
